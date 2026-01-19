@@ -2,6 +2,8 @@
 
 **"And Now for an Interactive Application for Something Completely Roman – Very Naughty Serif Cant Curves\!"**
 
+<img width="872" height="788" alt="MSB-Screenshot" src="https://github.com/user-attachments/assets/ebff0476-1c7c-4c9f-bf7f-bc5874d020dc" />
+
 The **Ministry of Silly Brackets (MSB)** is a pedagogical and design tool created to explore the transition from the vertical stem stroke to the horizontal serif outline in formal Roman lettering.
 
 More information about this project is available on the GitHub repository: <https://github.com/pedamado/MSB>. For a live demo and live page, check out the main branch webpage: <https://pedamado.github.io/MSB/>.
