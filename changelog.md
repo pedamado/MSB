@@ -1,4 +1,31 @@
-# **Changelog**
+# Changelog
+
+## [2.1.3] - 2026-01-19
+
+### Finalized
+
+- Version 2 is now complete.
+- **Credits Update:** Updated credits to reflect the 2.1.3 milestone and collaborative inspiration.
+- **Documentation:** Major updates to PRD and Readme files, including deep technical explanations of curve "slow-down" and the String-Line drafting method.
+- **UI Refinement:** Sidebar labels now explicitly describe the Analysis Overlays and their colors.
+
+### Fixed
+
+- Verified SVG export functionality for all diagnostic layers.
+- Confirmed coordinate mapping remains robust under extreme panning.
+
+## [2.1.2]
+
+- Initial labels for Speed Points and Envelope guides.
+
+## [2.1.0] - [2.1.1]
+
+- Implementation of Speed Points (Forest Green dots) and Density slider.
+- 3px point size refinement.
+
+## [2.0.3]
+
+- Refined Envelope of Tangents logic using constant subtangent properties.
 
 ## **[1.5.1] - 2026-01-19**
 
