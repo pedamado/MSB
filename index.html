@@ -271,9 +271,17 @@
 
         <div class="credits">
           Developed by Pedro Amado (FBAUP/i2ADS/Ligatures), in Gemini 3 Pro,
-          January 2026. Version 2.1.2. Inspired by the principles of **Yves
-          Leterme** and **Albert Kapr**. More info:
-          <a href="https://github.com/pedamado/MSB" target="_blank">GitHub</a>.
+          January 2026. Version 2.1.3. Inspired by the principles of **Yves
+          Leterme**. More information about this project is available on the
+          GitHub repository:
+          <a href="https://github.com/pedamado/MSB" target="_blank"
+            >https://github.com/pedamado/MSB</a
+          >. This project was developed within the context of the Graphic Design
+          bachelor's and Editorial Projects graduate degree courses of Lettering
+          and Type Design:
+          <a href="https://typedesign.fba.up.pt/msb/" target="_blank"
+            >https://typedesign.fba.up.pt/msb/</a
+          >.
         </div>
       </div>
 
@@ -306,13 +314,10 @@
       let serifs = [];
       let isDrawing = false;
       let isPanning = false;
-
-      // Feature Toggles (OFF by default)
       let showTangents = false;
       let showConstructions = false;
       let showSpeedPoints = false;
       let speedPointCount = 25;
-
       let mStart = { x: 0, y: 0 };
       let panX = 0,
         panY = 0;
@@ -482,7 +487,7 @@
 
         if (showSpeedPoints) {
           noStroke();
-          fill(34, 139, 34); // Forest Green
+          fill(34, 139, 34);
           for (let i = 0; i <= speedPointCount; i++) {
             let t = i / speedPointCount;
             let yN = Math.pow(5, -5 * t);
@@ -634,17 +639,12 @@
           oy = (height - gridHeight * pw) / 2 + panY;
         let svg = `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">`;
         svg += '<rect width="100%" height="100%" fill="white"/>';
-
-        // 1. Grid
-        svg += '<g id="grid" stroke="#e2e8f0" stroke-width="1">';
         for (let i = 0; i <= gridWidth; i++)
           svg += `<line x1="${ox + i * pw}" y1="${oy}" x2="${ox + i * pw}" y2="${oy + gridHeight * pw}" stroke="${i === 0 ? "#444" : "#ddd"}"/>`;
         for (let j = 0; j <= gridHeight; j++)
           svg += `<line x1="${ox}" y1="${oy + j * pw}" x2="${ox + gridWidth * pw}" y2="${oy + j * pw}" stroke="${j === gridHeight ? "#444" : "#ddd"}"/>`;
-        svg += "</g>";
-
-        // 2. Letterform (Stem and Serifs)
-        svg += `<g id="letterform" fill="#d1d5db" stroke="#000" stroke-width="1.2">`;
+        svg +=
+          '</g><g id="letterform" fill="#d1d5db" stroke="#000" stroke-width="1.2">';
         svg += `<rect x="${ox + stemCol * pw}" y="${oy}" width="${pw}" height="${gridHeight * pw}" />`;
         serifs.forEach((s) => {
           let isRight = s.uX >= stemCol + 1,
@@ -661,9 +661,6 @@
           }
           svg += `<path d="${path} L ${tx} ${ty} L ${ax} ${ty} Z" />`;
         });
-        svg += "</g>";
-
-        // 3. Tangents (If Active)
         if (showTangents) {
           svg +=
             '<g id="tangents" stroke="orange" stroke-width="1" stroke-opacity="0.5">';
@@ -690,64 +687,6 @@
           });
           svg += "</g>";
         }
-
-        // 4. Envelope Guides (If Active)
-        if (showConstructions) {
-          svg +=
-            '<g id="envelope-guides" stroke-width="1" stroke-opacity="0.5">';
-          serifs.forEach((s) => {
-            let isRight = s.uX >= stemCol + 1,
-              isBottom = s.uY + s.uH > gridHeight / 2;
-            let ax = isRight ? ox + (stemCol + 1) * pw : ox + stemCol * pw,
-              tx = isRight ? s.px + s.pw : s.px,
-              ay = isBottom ? s.py : s.py + s.ph,
-              ty = isBottom ? s.py + s.ph : s.py;
-
-            const getSVGLine = (x0N, col) => {
-              const b = 5,
-                lnB = Math.log(b),
-                y0 = Math.pow(b, -5 * x0N),
-                dy_dx = -5 * lnB * y0;
-              const xIntN = x0N - y0 / dy_dx,
-                yIntN = y0 - x0N * dy_dx;
-              const p1x = ax,
-                p1y = lerp(ty, ay, yIntN),
-                p2x = lerp(ax, tx, xIntN),
-                p2y = ty;
-              const vx = p2x - p1x,
-                vy = p2y - p1y;
-              return `<line x1="${p1x - vx * 0.1}" y1="${p1y - vy * 0.1}" x2="${p2x + vx * 0.1}" y2="${p2y + vy * 0.1}" stroke="${col}" />`;
-            };
-
-            svg += getSVGLine(findXForYIntercept(1.0), "darkblue");
-            svg += getSVGLine(findXForYIntercept(0.5), "darkblue");
-            svg += getSVGLine(findXForXIntercept(1.0), "darkred");
-            svg += getSVGLine(findXForXIntercept(0.5), "darkred");
-          });
-          svg += "</g>";
-        }
-
-        // 5. Speed Points (If Active)
-        if (showSpeedPoints) {
-          svg += '<g id="speed-points" fill="forestgreen">';
-          serifs.forEach((s) => {
-            let isRight = s.uX >= stemCol + 1,
-              isBottom = s.uY + s.uH > gridHeight / 2;
-            let ax = isRight ? ox + (stemCol + 1) * pw : ox + stemCol * pw,
-              tx = isRight ? s.px + s.pw : s.px,
-              ay = isBottom ? s.py : s.py + s.ph,
-              ty = isBottom ? s.py + s.ph : s.py;
-            for (let i = 0; i <= speedPointCount; i++) {
-              let t = i / speedPointCount,
-                yN = Math.pow(5, -5 * t),
-                px = lerp(ax, tx, t),
-                py = lerp(ty, ay, yN);
-              svg += `<circle cx="${px}" cy="${py}" r="1.5" />`;
-            }
-          });
-          svg += "</g>";
-        }
-
         svg += "</svg>";
         let b = new Blob([svg], { type: "image/svg+xml" }),
           u = URL.createObjectURL(b),
