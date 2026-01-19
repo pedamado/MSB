@@ -1,0 +1,460 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MSB - Ministry of Silly Brackets</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap");
+
+      body {
+        margin: 0;
+        background: #ffffff;
+        font-family: "Inter", sans-serif;
+        overflow: hidden;
+      }
+      #app-container {
+        display: flex;
+        height: 100vh;
+        width: 100vw;
+        position: relative;
+      }
+
+      #sidebar {
+        width: 340px;
+        min-width: 340px;
+        background: #ffffff;
+        border-right: 1px solid #e2e8f0;
+        display: flex;
+        flex-direction: column;
+        padding: 1.5rem;
+        overflow-y: auto;
+        transition:
+          transform 0.3s ease,
+          margin-left 0.3s ease;
+        z-index: 40;
+      }
+
+      #sidebar.closed {
+        margin-left: -340px;
+      }
+
+      h1 {
+        font-size: 1.75rem;
+        font-weight: 900;
+        color: #0f172a;
+        line-height: 1.1;
+        margin-bottom: 0.5rem;
+        letter-spacing: -0.02em;
+      }
+      h2 {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #7e22ce;
+        margin-bottom: 1rem;
+        line-height: 1.4;
+      }
+      .description {
+        font-size: 0.8rem;
+        color: #64748b;
+        line-height: 1.6;
+        margin-bottom: 1.5rem;
+      }
+
+      .control-group {
+        margin-bottom: 1.2rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+      }
+      label {
+        font-size: 0.65rem;
+        font-weight: 800;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .btn {
+        padding: 0.6rem;
+        border-radius: 0.4rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+        transition: all 0.2s;
+        text-align: center;
+        cursor: pointer;
+      }
+      .btn-primary {
+        background: #0f172a;
+        color: white;
+        border: 1px solid #0f172a;
+      }
+      .btn-primary:hover {
+        background: #000;
+      }
+      .btn-secondary {
+        background: #f8fafc;
+        color: #475569;
+        border: 1px solid #e2e8f0;
+      }
+      .btn-secondary:hover {
+        background: #f1f5f9;
+        border-color: #cbd5e1;
+      }
+
+      .credits {
+        font-size: 0.65rem;
+        color: #94a3b8;
+        margin-top: auto;
+        padding-top: 1.5rem;
+        border-top: 1px solid #f1f5f9;
+      }
+
+      #menu-toggle {
+        position: absolute;
+        left: 1rem;
+        bottom: 1rem;
+        z-index: 50;
+        background: #0f172a;
+        color: white;
+        padding: 0.75rem;
+        border-radius: 99px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        cursor: pointer;
+      }
+
+      #canvas-parent {
+        flex-grow: 1;
+        height: 100%;
+        position: relative;
+        background: #fff;
+        touch-action: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app-container">
+      <div id="sidebar">
+        <h1 class="font-black text-3xl">Ministry of Silly Brackets</h1>
+        <h2>
+          And Now for an Interactive Application for Something Completely Roman
+          – Very Naughty Serif Cant Curves!
+        </h2>
+
+        <p class="description">
+          No pixels were harmed in the making of these monumental inscriptions.
+          Visualizing Trajan bracket transitions with exponential decay: <br />
+          <code
+            class="bg-slate-100 p-1 rounded mt-2 block text-[0.7rem] font-mono text-center"
+            >y = 10 * (5^-x)</code
+          >
+        </p>
+
+        <div class="control-group">
+          <label
+            >Pen Width (pw):
+            <span id="pw-val" class="text-slate-900">100</span>px</label
+          >
+          <input
+            type="range"
+            id="pw-slider"
+            min="40"
+            max="150"
+            value="100"
+            class="w-full accent-purple-600"
+          />
+        </div>
+
+        <div class="control-group">
+          <label
+            >Grid Height:
+            <span id="gh-val" class="text-slate-900">10</span> units</label
+          >
+          <input
+            type="range"
+            id="gh-slider"
+            min="6"
+            max="14"
+            value="10"
+            class="w-full accent-purple-600"
+          />
+        </div>
+
+        <div class="flex flex-col gap-2 mt-2">
+          <button id="undo-btn" class="btn btn-secondary">
+            Undo Last Serif
+          </button>
+          <button id="reset-btn" class="btn btn-secondary">
+            Reset Canvas & Pan
+          </button>
+          <button id="export-btn" class="btn btn-primary">
+            Export JPG & SVG
+          </button>
+        </div>
+
+        <div class="text-[0.65rem] text-slate-400 mt-4 italic">
+          Tip: Left-click to draw. Right-click or 2-finger touch to pan.
+        </div>
+
+        <div class="credits">
+          Developed by Pedro Amado (FBAUP/i2ADS/Ligatures), in Gemini 3 Pro,
+          January 2026. Version 1.5.1. Inspired by the principles of **Yves
+          Leterme**.
+        </div>
+      </div>
+
+      <div id="canvas-parent">
+        <div id="menu-toggle" onclick="toggleSidebar()">
+          <svg
+            id="toggle-icon"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let pw = 100;
+      let gridHeight = 10;
+      let gridWidth = 14;
+      let stemCol = 4;
+      let serifs = [];
+      let isDrawing = false;
+      let isPanning = false;
+      let mStart = { x: 0, y: 0 };
+      let panX = 0,
+        panY = 0;
+      let startPanX = 0,
+        startPanY = 0;
+      let sidebarOpen = true;
+
+      function toggleSidebar() {
+        sidebarOpen = !sidebarOpen;
+        const sidebar = document.getElementById("sidebar");
+        const icon = document.getElementById("toggle-icon");
+        if (sidebarOpen) {
+          sidebar.classList.remove("closed");
+          icon.innerHTML =
+            '<line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line>';
+        } else {
+          sidebar.classList.add("closed");
+          icon.innerHTML =
+            '<polyline points="13 17 18 12 13 7"></polyline><polyline points="6 17 11 12 6 7"></polyline>';
+        }
+        setTimeout(() => {
+          const parent = document.getElementById("canvas-parent");
+          resizeCanvas(parent.offsetWidth, parent.offsetHeight);
+        }, 300);
+      }
+
+      function setup() {
+        const parent = document.getElementById("canvas-parent");
+        let cnv = createCanvas(parent.offsetWidth, parent.offsetHeight);
+        cnv.parent("canvas-parent");
+        cnv.elt.oncontextmenu = () => false;
+
+        select("#pw-slider").input(function () {
+          pw = parseInt(this.value());
+          select("#pw-val").html(pw);
+        });
+        select("#gh-slider").input(function () {
+          gridHeight = parseInt(this.value());
+          select("#gh-val").html(gridHeight);
+        });
+        select("#reset-btn").mousePressed(() => {
+          serifs = [];
+          panX = 0;
+          panY = 0;
+        });
+        select("#undo-btn").mousePressed(() => serifs.pop());
+        select("#export-btn").mousePressed(handleExport);
+      }
+
+      function draw() {
+        background(255);
+        let totalW = gridWidth * pw;
+        let totalH = gridHeight * pw;
+        let ox = (width - totalW) / 2 + panX;
+        let oy = (height - totalH) / 2 + panY;
+
+        drawGrid(ox, oy);
+        drawReferenceCircle(ox, oy);
+        drawLetterform(ox, oy);
+
+        if (isDrawing) {
+          let snap = getSnappedSelection(ox, oy);
+          stroke(0, 180, 255);
+          strokeWeight(1);
+          noFill();
+          rect(snap.px, snap.py, snap.pw, snap.ph);
+          drawSerifCurve(snap, ox, oy, true);
+        }
+      }
+
+      function drawGrid(ox, oy) {
+        for (let i = 0; i <= gridWidth; i++) {
+          stroke(i === 0 ? 80 : 230);
+          line(ox + i * pw, oy, ox + i * pw, oy + gridHeight * pw);
+        }
+        for (let j = 0; j <= gridHeight; j++) {
+          stroke(j === gridHeight ? 80 : 230);
+          line(ox, oy + j * pw, ox + gridWidth * pw, oy + j * pw);
+        }
+      }
+
+      function drawReferenceCircle(ox, oy) {
+        noFill();
+        stroke(126, 34, 206, 60);
+        strokeWeight(1.5);
+        drawingContext.setLineDash([8, 4]);
+        let d = gridHeight * pw;
+        ellipse(ox + d / 2, oy + d / 2, d, d);
+        drawingContext.setLineDash([]);
+      }
+
+      function drawLetterform(ox, oy) {
+        stroke(0);
+        strokeWeight(1.2);
+        fill(220);
+        rect(ox + stemCol * pw, oy, pw, gridHeight * pw);
+        serifs.forEach((s) => drawSerifCurve(s, ox, oy, false));
+      }
+
+      function drawSerifCurve(s, ox, oy, isPreview) {
+        if (isPreview) {
+          stroke(126, 34, 206);
+          noFill();
+          strokeWeight(3);
+        } else {
+          stroke(0);
+          fill(220);
+          strokeWeight(1.2);
+        }
+        let isRight = s.uX >= stemCol + 1,
+          isBottom = s.uY + s.uH > gridHeight / 2;
+        beginShape();
+        let ax = isRight ? ox + (stemCol + 1) * pw : ox + stemCol * pw;
+        let tx = isRight ? s.px + s.pw : s.px;
+        let ay = isBottom ? s.py : s.py + s.ph;
+        let ty = isBottom ? s.py + s.ph : s.py;
+        vertex(ax, ay);
+        for (let i = 0; i <= 40; i++) {
+          let t = i / 40,
+            yN = Math.pow(5, -5 * t);
+          vertex(lerp(ax, tx, t), lerp(ty, ay, yN));
+        }
+        vertex(tx, ty);
+        vertex(ax, ty);
+        endShape(CLOSE);
+      }
+
+      function getSnappedSelection(ox, oy) {
+        let x1 = constrain(floor((mStart.x - ox) / pw), 0, gridWidth - 1);
+        let y1 = constrain(floor((mStart.y - oy) / pw), 0, gridHeight - 1);
+        let x2 = constrain(floor((mouseX - ox) / pw), 0, gridWidth - 1);
+        let y2 = constrain(floor((mouseY - oy) / pw), 0, gridHeight - 1);
+        let uX = min(x1, x2),
+          uY = min(y1, y2),
+          uW = abs(x1 - x2) + 1,
+          uH = abs(y1 - y2) + 1;
+        return {
+          uX,
+          uY,
+          uW,
+          uH,
+          px: ox + uX * pw,
+          py: oy + uY * pw,
+          pw: uW * pw,
+          ph: uH * pw,
+        };
+      }
+
+      function mousePressed() {
+        if (mouseX < 0 || mouseX > width || mouseY < 0 || mouseY > height)
+          return;
+        if (mouseButton === RIGHT || (touches && touches.length === 2)) {
+          isPanning = true;
+          startPanX = mouseX - panX;
+          startPanY = mouseY - panY;
+        } else if (mouseButton === LEFT) {
+          isDrawing = true;
+          mStart.x = mouseX;
+          mStart.y = mouseY;
+        }
+      }
+
+      function mouseDragged() {
+        if (isPanning) {
+          panX = mouseX - startPanX;
+          panY = mouseY - startPanY;
+        }
+        return false;
+      }
+
+      function mouseReleased() {
+        if (isDrawing) {
+          let ox = (width - gridWidth * pw) / 2 + panX,
+            oy = (height - gridHeight * pw) / 2 + panY;
+          serifs.push(getSnappedSelection(ox, oy));
+        }
+        isDrawing = isPanning = false;
+      }
+
+      function handleExport() {
+        saveCanvas("MSB_Drawing", "jpg");
+        let ox = (width - gridWidth * pw) / 2 + panX,
+          oy = (height - gridHeight * pw) / 2 + panY;
+        let svg = `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">`;
+        svg += '<rect width="100%" height="100%" fill="white"/>';
+        svg += '<g id="grid" stroke="#e2e8f0" stroke-width="1">';
+        for (let i = 0; i <= gridWidth; i++)
+          svg += `<line x1="${ox + i * pw}" y1="${oy}" x2="${ox + i * pw}" y2="${oy + gridHeight * pw}" stroke="${i === 0 ? "#444" : "#ddd"}"/>`;
+        for (let j = 0; j <= gridHeight; j++)
+          svg += `<line x1="${ox}" y1="${oy + j * pw}" x2="${ox + gridWidth * pw}" y2="${oy + j * pw}" stroke="${j === gridHeight ? "#444" : "#ddd"}"/>`;
+        svg +=
+          '</g><g id="letterform" fill="#d1d5db" stroke="#000" stroke-width="1.2">';
+        svg += `<rect x="${ox + stemCol * pw}" y="${oy}" width="${pw}" height="${gridHeight * pw}" />`;
+        serifs.forEach((s) => {
+          let isRight = s.uX >= stemCol + 1,
+            isBottom = s.uY + s.uH > gridHeight / 2;
+          let ax = isRight ? ox + (stemCol + 1) * pw : ox + stemCol * pw,
+            tx = isRight ? s.px + s.pw : s.px,
+            ay = isBottom ? s.py : s.py + s.ph,
+            ty = isBottom ? s.py + s.ph : s.py;
+          let path = `M ${ax} ${ay} `;
+          for (let i = 0; i <= 20; i++) {
+            let t = i / 20,
+              yN = Math.pow(5, -5 * t);
+            path += `L ${ax + (tx - ax) * t} ${ty + (ay - ty) * yN} `;
+          }
+          svg += `<path d="${path} L ${tx} ${ty} L ${ax} ${ty} Z" />`;
+        });
+        svg += "</g></svg>";
+        let b = new Blob([svg], { type: "image/svg+xml" }),
+          u = URL.createObjectURL(b),
+          l = document.createElement("a");
+        l.href = u;
+        l.download = "MSB_Vector_Export.svg";
+        l.click();
+      }
+
+      function windowResized() {
+        const p = document.getElementById("canvas-parent");
+        resizeCanvas(p.offsetWidth, p.offsetHeight);
+      }
+    </script>
+  </body>
+</html>
